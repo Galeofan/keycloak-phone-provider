@@ -1,5 +1,6 @@
 <#import "template.ftl" as layout>
-<@layout.registrationLayout displayMessage=!messagesPerField.existsError('username','password','code','phoneNumber') displayInfo=realm.password && realm.registrationAllowed && !registrationDisabled??; section>
+<@layout.registrationLayout displayMessage=!messagesPerField.existsError('username','password','code','phoneNumber')
+displayInfo=realm.password && realm.registrationAllowed && !registrationDisabled??; section>
     <#if section = "header">
         ${msg("loginAccountTitle")}
     <#elseif section = "form">
@@ -26,6 +27,9 @@
                 <#if realm.password>
                     <form id="kc-form-login" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
 
+                        <!-- Создаем скрытый инпут username иначе он не уйдёт на бэк -->
+                        <input type="hidden" name="username" :value="phoneNumber" />
+
                         <#if !usernameHidden?? && supportPhone??>
                             <div class="${properties.kcFormClass!}">
                                 <div class="alert-error ${properties.kcAlertClass!} pf-m-danger" v-show="errorMessage">
@@ -35,97 +39,10 @@
 
                                     <span class="${properties.kcAlertTitleClass!}">{{ errorMessage }}</span>
                                 </div>
-
-
-                                <div class="${properties.kcFormGroupClass!}">
-                                    <div class="${properties.kcLabelWrapperClass!}">
-                                        <ul class="nav nav-pills nav-justified">
-                                            <li role="presentation" v-bind:class="{ active: !phoneActivated }"
-                                            v-on:click="phoneActivated = false">
-                                                <a href="#">
-                                                    ${msg("loginByPassword")}
-                                                </a>
-                                            </li>
-                                            <li role="presentation" v-bind:class="{ active: phoneActivated }"
-                                            v-on:click="phoneActivated = true"><a href="#">${msg("loginByPhone")}</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
                             </div>
-
-                            <input type="hidden" id="phoneActivated" name="phoneActivated" v-model="phoneActivated">
                         </#if>
 
-
-                        <div  <#if !usernameHidden?? && supportPhone??> v-if="!phoneActivated" </#if> >
-                            <#if !usernameHidden??>
-                                <div class="${properties.kcFormGroupClass!}">
-                                    <label for="username" class="${properties.kcLabelClass!}">
-                                        <#if !realm.loginWithEmailAllowed>${msg("username")}
-                                            <#if loginWithPhoneNumber??> ${msg("usernameOrPhoneNumber")} <#else>${msg("username")}</#if>
-                                        <#elseif !realm.registrationEmailAsUsername>
-                                            <#if loginWithPhoneNumber??> ${msg("usernameOrEmailOrPhoneNumber")} <#else>${msg("usernameOrEmail")}</#if>
-                                        <#else>
-                                            <#if loginWithPhoneNumber??> ${msg("emailOrPhoneNumber")} <#else>${msg("email")}</#if>
-                                        </#if>
-                                    </label>
-
-                                    <input tabindex="0" id="username" class="${properties.kcInputClass!}" name="username" value="${(login.username!'')}"  type="text" autofocus autocomplete="off"
-                                    aria-invalid="<#if messagesPerField.existsError('username','password')>true</#if>"
-                                    />
-
-                                    <#if messagesPerField.existsError('username','password')>
-                                        <span id="input-error" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
-                                            ${kcSanitize(messagesPerField.getFirstError('username','password'))?no_esc}
-                                        </span>
-                                    </#if>
-
-                                </div>
-                            </#if>
-
-                            <div class="${properties.kcFormGroupClass!}">
-                                <label for="password" class="${properties.kcLabelClass!}">${msg("password")}</label>
-
-                                <input tabindex="0" id="password" class="${properties.kcInputClass!}" name="password" type="password" autocomplete="off"
-                                aria-invalid="<#if messagesPerField.existsError('username','password')>true</#if>"
-                                />
-
-                                <#if usernameHidden?? && messagesPerField.existsError('username','password')>
-                                    <span id="input-error" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
-                                        ${kcSanitize(messagesPerField.getFirstError('username','password'))?no_esc}
-                                    </span>
-                                </#if>
-
-                            </div>
-
-
-                            <div class="${properties.kcFormGroupClass!} ${properties.kcFormSettingClass!}">
-                                <div id="kc-form-options">
-                                    <#if realm.rememberMe && !usernameHidden??>
-                                        <div class="checkbox">
-                                            <label>
-                                                <#if login.rememberMe??>
-                                                    <input tabindex="0" id="rememberMe" name="rememberMe" type="checkbox" checked> ${msg("rememberMe")}
-                                                <#else>
-                                                    <input tabindex="0" id="rememberMe" name="rememberMe" type="checkbox"> ${msg("rememberMe")}
-                                                </#if>
-                                            </label>
-                                        </div>
-                                    </#if>
-                                </div>
-                                <div class="${properties.kcFormOptionsWrapperClass!}">
-                                    <#if realm.resetPasswordAllowed>
-                                        <span><a tabindex="0" href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a></span>
-                                    </#if>
-                                </div>
-                            </div>
-
-
-                        </div>
-
                         <#if !usernameHidden?? && supportPhone??>
-                            <div v-if="phoneActivated">
                                 <div class="${properties.kcFormGroupClass!}">
                                     <label for="phoneNumber" class="${properties.kcLabelClass!}">${msg("phoneNumber")}</label>
                                     <input tabindex="0" type="text" id="phoneNumber" name="phoneNumber" v-model="phoneNumber"
@@ -154,7 +71,6 @@
                                         type="button" v-model="sendButtonText" :disabled='sendButtonText !== initSendButtonText' v-on:click="sendVerificationCode()"/>
                                     </div>
                                 </div>
-                            </div>
                         </#if>
 
 

@@ -99,14 +99,6 @@ public class PhoneUsernamePasswordForm extends UsernamePasswordForm implements A
   @Override
   protected boolean validateForm(AuthenticationFlowContext context, MultivaluedMap<String, String> inputData) {
 
-    boolean byPhone = OptionalUtils
-        .ofBlank(inputData.getFirst(FIELD_PATH_PHONE_ACTIVATED))
-        .map(s -> "true".equalsIgnoreCase(s) || "yes".equalsIgnoreCase(s))
-        .orElse(false);
-
-    if (!byPhone) {
-      return validateUserAndPassword(context, inputData);
-    }
     String phoneNumber = inputData.getFirst(FIELD_PHONE_NUMBER);
 
     if (Validation.isBlank(phoneNumber)) {
