@@ -18,13 +18,16 @@ FROM quay.io/keycloak/keycloak:26.2.3
 #RUN curl -fSL https://repo1.maven.org/maven2/com/google/code/gson/gson/2.8.6/gson-2.8.6.jar -o gson-2.8.6.jar
 
 # main provider
-COPY providers/keycloak-phone-provider-2.5.0.jar /opt/keycloak/providers/
+COPY providers/keycloak-phone-provider.jar /opt/keycloak/providers/
 
 #resources
-COPY providers/keycloak-phone-provider.resources-2.5.0.jar /opt/keycloak/providers/
+COPY providers/keycloak-phone-provider.resources.jar /opt/keycloak/providers/
 
 #dummy provider
-COPY providers/keycloak-sms-provider-dummy-2.5.0.jar /opt/keycloak/providers/
+COPY providers/keycloak-sms-provider-dummy.jar /opt/keycloak/providers/
+
+#mtsb provider
+COPY providers/keycloak-sms-provider-mtsb.jar /opt/keycloak/providers/
 
 RUN mkdir /opt/keycloak/certs
 

@@ -2,7 +2,16 @@
 <@layout.registrationLayout displayMessage=!messagesPerField.existsError('username','password','code','phoneNumber')
 displayInfo=realm.password && realm.registrationAllowed && !registrationDisabled??; section>
     <#if section = "header">
-        ${msg("loginAccountTitle")}
+        <#if section?has_content && section == "header">
+            <div class="kc-header-with-logo">
+                <img class="kc-header-logo"
+                src="${url.resourcesPath}/img/company-logo.svg"
+                alt="${msg('loginTitle', 'Логотип')}" />
+                <h1 class="kc-header-title">
+                    ${msg("loginAccountTitle")}
+                </h1>
+            </div>
+        </#if>
     <#elseif section = "form">
 
         <#if !usernameHidden?? && supportPhone??>
@@ -139,7 +148,7 @@ displayInfo=realm.password && realm.registrationAllowed && !registrationDisabled
             <div id="kc-registration-container">
                 <div id="kc-registration">
                     <span>${msg("noAccount")} <a tabindex="0"
-                    href="${url.registrationUrl}">${msg("doRegister")}</a></span>
+                    href="${url.registrationUrl}">${msg("doRegister2")}</a></span>
                 </div>
             </div>
         </#if>

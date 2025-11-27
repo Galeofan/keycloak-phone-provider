@@ -1,7 +1,16 @@
 <#import "template.ftl" as layout>
 <@layout.registrationLayout displayMessage=!messagesPerField.existsError('firstName','lastName','email','username','password','password-confirm','phoneNumber','registerCode'); section>
     <#if section = "header">
-        ${msg("registerTitle")}
+        <#if section?has_content && section == "header">
+            <div class="kc-header-with-logo">
+                <img class="kc-header-logo"
+                src="${url.resourcesPath}/img/mt-logo.svg"
+                alt="${msg('loginTitle', 'лого')}" />
+                <h1 class="kc-header-title">
+                    ${msg("loginAccountTitle")}
+                </h1>
+            </div>
+        </#if>
     <#elseif section = "form">
         <#if phoneNumberRequired??>
             <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>

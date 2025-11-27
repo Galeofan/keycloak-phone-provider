@@ -10,7 +10,7 @@
         <version>2.5.0</version>
     </parent>
 
-    <artifactId>keycloak-sms-provider-mtsb-${project.version}</artifactId>
+    <artifactId>keycloak-sms-provider-mtsb</artifactId>
 
     <dependencies>
         <dependency>
