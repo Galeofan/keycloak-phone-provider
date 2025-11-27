@@ -1,0 +1,8 @@
+#!/bin/sh
+
+#if [ "$1" = "test" ] || [[ @project.version@ = *"snapshot" ]] || [[ @project.version@ = *"SNAPSHOT" ]]
+#then
+#  docker build -t coopersoft/keycloak:@version.keycloak@_phone-@project.version@ .
+#else
+  docker buildx build . --platform linux/amd64 --load -t galeofan/keycloak:26.2.3_phone-2.5.0
+#fi
