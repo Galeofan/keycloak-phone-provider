@@ -20,6 +20,20 @@
                 margin: 0;
                 transform: translateY(-5vh); /* поднимаем форму наверх */
                 }
+
+                .kc-header-with-logo {
+                display: flex;
+                align-items: flex-start;
+                gap: 6px; /* расстояние между логотипом и заголовком */
+                }
+
+                .kc-header-logo {
+                height: 64px; /* уменьшает логотип */
+                width: auto;
+                position: relative !important;
+                top: 12px !important;
+                display: inline-block; /* важно для корректного смещения */
+                }
             </style>
 
             <#if properties.meta?has_content>
@@ -80,70 +94,17 @@
                 <#-- Убрали блок отображения имени Realm -->
                 <div class="${properties.kcFormCardClass!}">
                     <header class="${properties.kcFormHeaderClass!}">
-                        <#if realm.internationalizationEnabled  && locale.supported?size gt 1>
-                            <div class="${properties.kcLocaleMainClass!}" id="kc-locale">
-                                <div id="kc-locale-wrapper" class="${properties.kcLocaleWrapperClass!}">
-                                    <div id="kc-locale-dropdown" class="menu-button-links ${properties.kcLocaleDropDownClass!}">
-                                        <button tabindex="1" id="kc-current-locale-link" aria-label="${msg("languages")}" aria-haspopup="true" aria-expanded="false" aria-controls="language-switch1">${locale.current}</button>
-                                        <ul role="menu" tabindex="-1" aria-labelledby="kc-current-locale-link" aria-activedescendant="" id="language-switch1" class="${properties.kcLocaleListClass!}">
-                                            <#assign i = 1>
-                                            <#list locale.supported as l>
-                                                <li class="${properties.kcLocaleListItemClass!}" role="none">
-                                                    <a role="menuitem" id="language-${i}" class="${properties.kcLocaleItemClass!}" href="${l.url}">${l.label}</a>
-                                                </li>
-                                                <#assign i++>
-                                            </#list>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </#if>
-                        <#if !(auth?has_content && auth.showUsername() && !auth.showResetCredentials())>
-                            <#if displayRequiredFields>
-                                <div class="${properties.kcContentWrapperClass!}">
-                                    <div class="${properties.kcLabelWrapperClass!} subtitle">
-                                        <span class="subtitle"><span class="required">*</span> ${msg("requiredFields")}</span>
-                                    </div>
-                                    <div class="col-md-10">
-                                        <h1 id="kc-page-title"><#nested "header"></h1>
-                                    </div>
-                                </div>
-                            <#else>
-                                <h1 id="kc-page-title"><#nested "header"></h1>
-                            </#if>
-                        <#else>
-                            <#if displayRequiredFields>
-                                <div class="${properties.kcContentWrapperClass!}">
-                                    <div class="${properties.kcLabelWrapperClass!} subtitle">
-                                        <span class="subtitle"><span class="required">*</span> ${msg("requiredFields")}</span>
-                                    </div>
-                                    <div class="col-md-10">
-                                        <#nested "show-username">
-                                        <div id="kc-username" class="${properties.kcFormGroupClass!}">
-                                            <label id="kc-attempted-username">${auth.attemptedUsername}</label>
-                                            <a id="reset-login" href="${url.loginRestartFlowUrl}" aria-label="${msg("restartLoginTooltip")}">
-                                                <div class="kc-login-tooltip">
-                                                    <i class="${properties.kcResetFlowIcon!}"></i>
-                                                    <span class="kc-tooltip-text">${msg("restartLoginTooltip")}</span>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            <#else>
-                                <#nested "show-username">
-                                <div id="kc-username" class="${properties.kcFormGroupClass!}">
-                                    <label id="kc-attempted-username">${auth.attemptedUsername}</label>
-                                    <a id="reset-login" href="${url.loginRestartFlowUrl}" aria-label="${msg("restartLoginTooltip")}">
-                                        <div class="kc-login-tooltip">
-                                            <i class="${properties.kcResetFlowIcon!}"></i>
-                                            <span class="kc-tooltip-text">${msg("restartLoginTooltip")}</span>
-                                        </div>
-                                    </a>
-                                </div>
-                            </#if>
-                        </#if>
+                        <div class="kc-header-with-logo">
+                            <img src="${url.resourcesPath}/img/mt-logo.svg"
+                            alt="logo"
+                            class="kc-header-logo"/>
+
+                            <h1 id="kc-page-title">
+                                <#nested "header">
+                            </h1>
+                        </div>
                     </header>
+
                     <div id="kc-content">
                         <div id="kc-content-wrapper">
 

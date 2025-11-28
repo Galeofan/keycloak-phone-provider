@@ -3,9 +3,6 @@
     <#if section = "header">
         <#if section?has_content && section == "header">
             <div class="kc-header-with-logo">
-                <img class="kc-header-logo"
-                src="${url.resourcesPath}/img/mt-logo.svg"
-                alt="${msg('loginTitle', 'лого')}" />
                 <h1 class="kc-header-title">
                     ${msg("loginAccountTitle")}
                 </h1>

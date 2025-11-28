@@ -4,12 +4,12 @@ displayInfo=realm.password && realm.registrationAllowed && !registrationDisabled
     <#if section = "header">
         <#if section?has_content && section == "header">
             <div class="kc-header-with-logo">
-                <img src="${url.resourcesPath}/img/mt-logo.svg" alt="logo">
                 <h1 class="kc-header-title">
                     ${msg("loginAccountTitle")}
                 </h1>
             </div>
         </#if>
+
     <#elseif section = "form">
 
         <#if !usernameHidden?? && supportPhone??>
