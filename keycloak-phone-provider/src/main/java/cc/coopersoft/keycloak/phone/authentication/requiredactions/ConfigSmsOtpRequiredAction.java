@@ -17,7 +17,7 @@ import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.core.Response;
 import java.util.Optional;
 
-import static cc.coopersoft.keycloak.phone.authentication.authenticators.browser.PhoneUsernamePasswordForm.VERIFIED_PHONE_NUMBER;
+import static cc.coopersoft.keycloak.phone.authentication.authenticators.browser.PhoneNumberForm.VERIFIED_PHONE_NUMBER;
 
 public class ConfigSmsOtpRequiredAction implements RequiredActionProvider {
 

@@ -21,13 +21,13 @@ FROM quay.io/keycloak/keycloak:26.2.3
 COPY providers/keycloak-phone-provider.jar /opt/keycloak/providers/
 
 #resources
-COPY providers/keycloak-phone-provider.resources.jar /opt/keycloak/providers/
+#COPY providers/keycloak-phone-provider.resources.jar /opt/keycloak/providers/
 
 #dummy provider
 COPY providers/keycloak-sms-provider-dummy.jar /opt/keycloak/providers/
 
 #mtsb provider
-COPY providers/keycloak-sms-provider-mtsb.jar /opt/keycloak/providers/
+#COPY providers/keycloak-sms-provider-mtsb.jar /opt/keycloak/providers/
 
 RUN mkdir /opt/keycloak/certs
 

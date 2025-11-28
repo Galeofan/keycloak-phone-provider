@@ -4,7 +4,6 @@ import cc.coopersoft.keycloak.phone.authentication.forms.SupportPhonePages;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.exception.PhoneNumberInvalidException;
 import cc.coopersoft.keycloak.phone.providers.spi.PhoneVerificationCodeProvider;
-import cc.coopersoft.common.OptionalUtils;
 import cc.coopersoft.keycloak.phone.Utils;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
@@ -37,11 +36,11 @@ import static org.keycloak.authentication.authenticators.util.AuthenticatorUtils
 import static org.keycloak.provider.ProviderConfigProperty.BOOLEAN_TYPE;
 import static org.keycloak.services.validation.Validation.FIELD_USERNAME;
 
-public class PhoneUsernamePasswordForm extends UsernamePasswordForm implements AuthenticatorFactory {
+public class PhoneNumberForm extends UsernamePasswordForm implements AuthenticatorFactory {
 
-  private static final Logger logger = Logger.getLogger(PhoneUsernamePasswordForm.class);
+  private static final Logger logger = Logger.getLogger(PhoneNumberForm.class);
 
-  public static final String PROVIDER_ID = "auth-phone-username-password-form";
+  public static final String PROVIDER_ID = "auth-phone-form";
 
   public static final String VERIFIED_PHONE_NUMBER = "LOGIN_BY_PHONE_VERIFY";
 

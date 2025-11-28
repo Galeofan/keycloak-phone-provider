@@ -13,6 +13,13 @@
   <artifactId>keycloak-phone-provider.resources</artifactId>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources/theme</directory>
+        <targetPath>theme</targetPath>
+        <filtering>false</filtering>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>

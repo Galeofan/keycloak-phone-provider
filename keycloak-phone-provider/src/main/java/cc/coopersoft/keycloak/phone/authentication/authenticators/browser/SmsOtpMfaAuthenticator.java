@@ -26,7 +26,7 @@ import jakarta.ws.rs.core.Response;
 import java.net.URI;
 import java.util.Optional;
 
-import static cc.coopersoft.keycloak.phone.authentication.authenticators.browser.PhoneUsernamePasswordForm.VERIFIED_PHONE_NUMBER;
+import static cc.coopersoft.keycloak.phone.authentication.authenticators.browser.PhoneNumberForm.VERIFIED_PHONE_NUMBER;
 import static cc.coopersoft.keycloak.phone.authentication.forms.SupportPhonePages.ATTRIBUTE_SUPPORT_PHONE;
 
 public class SmsOtpMfaAuthenticator implements Authenticator, CredentialValidator<PhoneOtpCredentialProvider> {
