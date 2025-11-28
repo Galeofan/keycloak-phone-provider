@@ -20,8 +20,8 @@ FROM quay.io/keycloak/keycloak:26.2.3
 # main provider
 COPY providers/keycloak-phone-provider.jar /opt/keycloak/providers/
 
-#resources
-#COPY providers/keycloak-phone-provider.resources.jar /opt/keycloak/providers/
+#theme
+COPY providers/keycloak-phone-provider-theme.jar /opt/keycloak/providers/
 
 #dummy provider
 COPY providers/keycloak-sms-provider-dummy.jar /opt/keycloak/providers/

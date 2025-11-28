@@ -10,16 +10,9 @@
     <version>2.5.0</version>
   </parent>
 
-  <artifactId>keycloak-phone-provider.resources</artifactId>
+  <artifactId>keycloak-phone-provider-theme</artifactId>
 
   <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources/theme</directory>
-        <targetPath>theme</targetPath>
-        <filtering>false</filtering>
-      </resource>
-    </resources>
     <plugins>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>

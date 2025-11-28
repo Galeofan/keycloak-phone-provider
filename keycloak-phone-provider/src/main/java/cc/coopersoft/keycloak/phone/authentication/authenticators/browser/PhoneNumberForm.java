@@ -40,7 +40,7 @@ public class PhoneNumberForm extends UsernamePasswordForm implements Authenticat
 
   private static final Logger logger = Logger.getLogger(PhoneNumberForm.class);
 
-  public static final String PROVIDER_ID = "auth-phone-form";
+  public static final String PROVIDER_ID = "phone-number-form";
 
   public static final String VERIFIED_PHONE_NUMBER = "LOGIN_BY_PHONE_VERIFY";
 
@@ -299,7 +299,7 @@ public class PhoneNumberForm extends UsernamePasswordForm implements Authenticat
 
   @Override
   public String getDisplayType() {
-    return "Phone Username Password Form";
+    return "Phone number form";
   }
 
   @Override
@@ -323,7 +323,7 @@ public class PhoneNumberForm extends UsernamePasswordForm implements Authenticat
 
   @Override
   public String getHelpText() {
-    return "Validates a username and password or phone and verification code from login form.";
+    return "Validates phone and verification code from login form.";
   }
 
   protected static final List<ProviderConfigProperty> CONFIG_PROPERTIES;
