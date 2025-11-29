@@ -117,7 +117,7 @@ public class DefaultPhoneProvider implements PhoneProvider {
     @Override
     public int sendTokenCode(String phoneNumber, String sourceAddr, TokenCodeType type, String kind) {
 
-        logger.info("Sending code to:" + phoneNumber);
+        logger.info("Sending code to: " + phoneNumber);
 
         if (getTokenCodeService().isAbusing(phoneNumber, type, sourceAddr, sourceHourMaximum, targetHourMaximum)) {
             throw new ForbiddenException("You requested the maximum number of messages the last hour");
