@@ -1,4 +1,4 @@
-package cc.coopersoft.keycloak.phone.providers.spi;
+package cc.coopersoft.keycloak.phone.providers.spi.phoneverify;
 
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.representations.TokenCodeRepresentation;

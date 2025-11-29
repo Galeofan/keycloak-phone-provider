@@ -1,7 +1,7 @@
 package cc.coopersoft.keycloak.phone.providers.sender;
 
 import cc.coopersoft.keycloak.phone.providers.exception.MessageSendException;
-import cc.coopersoft.keycloak.phone.providers.spi.FullSmsSenderAbstractService;
+import cc.coopersoft.keycloak.phone.providers.spi.messagesender.FullSmsSenderAbstractService;
 import org.jboss.logging.Logger;
 import org.keycloak.models.KeycloakSession;
 

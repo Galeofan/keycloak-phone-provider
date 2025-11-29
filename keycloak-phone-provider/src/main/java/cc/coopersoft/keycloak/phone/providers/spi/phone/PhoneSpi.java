@@ -1,4 +1,4 @@
-package cc.coopersoft.keycloak.phone.providers.spi;
+package cc.coopersoft.keycloak.phone.providers.spi.phone;
 
 import org.keycloak.provider.Spi;
 

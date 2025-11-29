@@ -1,4 +1,4 @@
-package cc.coopersoft.keycloak.phone.providers.spi;
+package cc.coopersoft.keycloak.phone.providers.spi.messagesender;
 
 import cc.coopersoft.common.OptionalUtils;
 import cc.coopersoft.keycloak.phone.Utils;

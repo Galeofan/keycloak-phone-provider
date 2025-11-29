@@ -1,7 +1,7 @@
-package cc.coopersoft.keycloak.phone.providers.spi.impl;
+package cc.coopersoft.keycloak.phone.providers.spi.phone.impl;
 
-import cc.coopersoft.keycloak.phone.providers.spi.PhoneProvider;
-import cc.coopersoft.keycloak.phone.providers.spi.PhoneProviderFactory;
+import cc.coopersoft.keycloak.phone.providers.spi.phone.PhoneProvider;
+import cc.coopersoft.keycloak.phone.providers.spi.phone.PhoneProviderFactory;
 import org.keycloak.Config.Scope;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;

@@ -1,12 +1,12 @@
-package cc.coopersoft.keycloak.phone.providers.spi.impl;
+package cc.coopersoft.keycloak.phone.providers.spi.phoneverify.impl;
 
-import cc.coopersoft.keycloak.phone.providers.spi.PhoneVerificationCodeProvider;
-import cc.coopersoft.keycloak.phone.providers.spi.PhoneVerificationCodeProviderFactory;
+import cc.coopersoft.keycloak.phone.providers.spi.phoneverify.PhoneVerificationCodeProvider;
+import cc.coopersoft.keycloak.phone.providers.spi.phoneverify.PhoneVerificationCodeProviderFactory;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
-public class DefaultVerificationCodeProviderFactory implements PhoneVerificationCodeProviderFactory {
+public class DefaultPhoneVerificationCodeProviderFactory implements PhoneVerificationCodeProviderFactory {
 
     @Override
     public PhoneVerificationCodeProvider create(KeycloakSession session) {
