@@ -117,7 +117,7 @@ public class DefaultPhoneProvider implements PhoneProvider {
     @Override
     public int sendTokenCode(String phoneNumber, String sourceAddr, TokenCodeType type, String kind) {
 
-        logger.info("send code to:" + phoneNumber);
+        logger.info("Sending code to:" + phoneNumber);
 
         if (getTokenCodeService().isAbusing(phoneNumber, type, sourceAddr, sourceHourMaximum, targetHourMaximum)) {
             throw new ForbiddenException("You requested the maximum number of messages the last hour");
@@ -132,8 +132,7 @@ public class DefaultPhoneProvider implements PhoneProvider {
         TokenCodeRepresentation token = TokenCodeRepresentation.forPhoneNumber(phoneNumber);
 
         try {
-            session.getProvider(MessageSenderService.class, service).sendSmsMessage(type, phoneNumber, token.getCode(),
-                    tokenExpiresIn, kind);
+            session.getProvider(MessageSenderService.class, service).sendSmsMessage(phoneNumber);
             getTokenCodeService().persistCode(token, type, tokenExpiresIn);
 
             logger.info(String.format("Sent %s code to %s over %s", type.label, phoneNumber, service));

@@ -20,12 +20,12 @@ public class MtsbSmsSenderService extends FullSmsSenderAbstractService {
     }
 
     @Override
-    public void sendMessage(String phoneNumber, String message) throws MessageSendException {
+    public void sendMessage(String phoneNumber) throws MessageSendException {
 //        HttpPost = getPostMethod();
 //        httpClient.execute();
 
         // here you call the method for sending messages
-        logger.info(String.format("To: %s >>> %s", phoneNumber, message));
+        logger.info(String.format("Sending to: %s ", phoneNumber));
 
         // simulate a failure
         if (new Random().nextInt(10) % 5 == 0) {
