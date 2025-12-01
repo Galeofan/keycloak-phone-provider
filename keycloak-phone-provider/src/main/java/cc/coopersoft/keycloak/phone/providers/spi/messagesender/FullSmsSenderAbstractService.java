@@ -20,7 +20,7 @@ public abstract class FullSmsSenderAbstractService implements MessageSenderServi
 
     private final String realmDisplay;
 
-    private final KeycloakSession session;
+    protected final KeycloakSession session;
 
     @Deprecated
     public FullSmsSenderAbstractService(String realmDisplay) {
@@ -33,18 +33,8 @@ public abstract class FullSmsSenderAbstractService implements MessageSenderServi
         this.realmDisplay = session.getContext().getRealm().getDisplayName();
     }
 
-//    public abstract void sendMessage(String phoneNumber, String message) throws MessageSendException;
-
     public abstract void sendMessage(String phoneNumber) throws MessageSendException;
 
-//    @Override
-//    public void sendSmsMessage(TokenCodeType type, String phoneNumber, String code, int expires, String kind)
-//            throws MessageSendException {
-//        final String defaultMessage = String.format("[%s] - " + type.label + " code: %s, expires: %s minute ",
-//                realmDisplay, code, expires / 60);
-//        final String MESSAGE = localizeMessage(type, phoneNumber, code, expires).orElse(defaultMessage);
-//        sendMessage(phoneNumber, MESSAGE);
-//    }
 
     @Override
     public void sendSmsMessage(String phoneNumber) throws MessageSendException {

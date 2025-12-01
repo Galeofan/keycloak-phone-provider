@@ -129,16 +129,16 @@ public class DefaultPhoneProvider implements PhoneProvider {
             return (int) (ongoing.getExpiresAt().getTime() - Instant.now().toEpochMilli()) / 1000;
         }
 
-        TokenCodeRepresentation token = TokenCodeRepresentation.forPhoneNumber(phoneNumber);
-
         try {
+            //Отправляем СМС в отдельном модуле
             session.getProvider(MessageSenderService.class, service).sendSmsMessage(phoneNumber);
+            String requestId = (String) session.getAttribute("REQUEST_ID");
+            //Обёртка для сохранения токена
+            TokenCodeRepresentation token = TokenCodeRepresentation.forPhoneNumber(phoneNumber, requestId);
+            //Сохранение в бд
             getTokenCodeService().persistCode(token, type, tokenExpiresIn);
-
             logger.info(String.format("Sent %s code to %s over %s", type.label, phoneNumber, service));
-
         } catch (MessageSendException e) {
-
             logger.error(String.format("Message sending to %s failed with %s: %s",
                     phoneNumber, e.getErrorCode(), e.getErrorMessage()));
             throw new ServiceUnavailableException("Internal server error");

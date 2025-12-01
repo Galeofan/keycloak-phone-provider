@@ -154,7 +154,7 @@ public class RegistrationPhoneVerificationCode implements FormAction, FormAction
     String verificationCode = formData.getFirst(FIELD_VERIFICATION_CODE);
     TokenCodeRepresentation tokenCode = getTokenCodeService(session).ongoingProcess(phoneNumber,
         TokenCodeType.REGISTRATION);
-    if (Validation.isBlank(verificationCode) || tokenCode == null || !tokenCode.getCode().equals(verificationCode)) {
+    if (Validation.isBlank(verificationCode) || tokenCode == null || !tokenCode.getRequestId().equals(verificationCode)) {
       context.error(Errors.INVALID_REGISTRATION);
       formData.remove(FIELD_VERIFICATION_CODE);
       errors.add(new FormMessage(FIELD_VERIFICATION_CODE, SupportPhonePages.Errors.NOT_MATCH.message()));

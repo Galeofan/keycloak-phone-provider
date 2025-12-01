@@ -1,12 +1,16 @@
 package cc.coopersoft.keycloak.phone.providers.sender;
 
-import cc.coopersoft.keycloak.phone.providers.sender.dto.SmsDto;
+import cc.coopersoft.keycloak.phone.providers.representations.TokenCodeRepresentation;
+import cc.coopersoft.keycloak.phone.providers.sender.dto.SmsRequestDto;
+import cc.coopersoft.keycloak.phone.providers.sender.dto.SmsResponseDto;
 import cc.coopersoft.keycloak.phone.providers.spi.messagesender.FullSmsSenderAbstractService;
+import cc.coopersoft.keycloak.phone.providers.spi.phoneverify.PhoneVerificationCodeProvider;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.jboss.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.keycloak.connections.httpclient.HttpClientProvider;
@@ -21,6 +25,10 @@ public class MtsbSmsSenderService extends FullSmsSenderAbstractService {
     private static final Logger logger = Logger.getLogger(MtsbSmsSenderService.class);
     private final CloseableHttpClient httpClient;
 
+    private PhoneVerificationCodeProvider getTokenCodeService() {
+        return session.getProvider(PhoneVerificationCodeProvider.class);
+    }
+
     public MtsbSmsSenderService(KeycloakSession session) {
         super(session);
         this.httpClient = session.getProvider(HttpClientProvider.class)
@@ -30,15 +38,26 @@ public class MtsbSmsSenderService extends FullSmsSenderAbstractService {
     @Override
     public void sendMessage(String phoneNumber) {
         logger.info(String.format("Sending to: %s ", phoneNumber));
-        logger.info("Build request dto");
-        SmsDto request = SmsDto.builder()
+
+        SmsRequestDto request = SmsRequestDto.builder()
                 .sms("test")
                 .build();
+
         HttpPost post = createPostRequest(request);
+
         try {
             HttpResponse httpResponse = httpClient.execute(post);
-            logger.info("Post запрос выполнен");
-            logger.info(httpResponse.toString());
+
+            int status = httpResponse.getStatusLine().getStatusCode();
+            String body = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+
+            logger.infof("HTTP status: %s", status);
+            logger.infof("HTTP body: %s", body);
+
+            SmsResponseDto dto = JsonSerialization.readValue(body, SmsResponseDto.class);
+
+            session.setAttribute("REQUEST_ID", dto.getRequestId());
+
         } catch (Exception e) {
             logger.error("Ошибка при выполнении запроса или парсинге ответа", e);
             throw new RuntimeException(e);
@@ -46,7 +65,7 @@ public class MtsbSmsSenderService extends FullSmsSenderAbstractService {
     }
 
     @NotNull
-    private static HttpPost createPostRequest(SmsDto request) {
+    private static HttpPost createPostRequest(SmsRequestDto request) {
         try {
             final URI uri = new URIBuilder("https://host.docker.internal:8983/sms")
                     .setCharset(StandardCharsets.UTF_8)

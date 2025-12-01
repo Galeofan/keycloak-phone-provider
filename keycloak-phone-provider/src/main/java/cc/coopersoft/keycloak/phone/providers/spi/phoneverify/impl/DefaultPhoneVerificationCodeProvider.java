@@ -69,7 +69,7 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
 
             tokenCodeRepresentation.setId(entity.getId());
             tokenCodeRepresentation.setPhoneNumber(entity.getPhoneNumber());
-            tokenCodeRepresentation.setCode(entity.getCode());
+            tokenCodeRepresentation.setRequestId(entity.getCode());
             tokenCodeRepresentation.setType(entity.getType());
             tokenCodeRepresentation.setCreatedAt(entity.getCreatedAt());
             tokenCodeRepresentation.setExpiresAt(entity.getExpiresAt());
@@ -126,7 +126,7 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
         entity.setId(tokenCode.getId());
         entity.setRealmId(getRealm().getId());
         entity.setPhoneNumber(tokenCode.getPhoneNumber());
-        entity.setCode(tokenCode.getCode());
+        entity.setCode(tokenCode.getRequestId());
         entity.setType(tokenCodeType.name());
         entity.setCreatedAt(Date.from(now));
         entity.setExpiresAt(Date.from(now.plusSeconds(tokenExpiresIn)));
@@ -154,7 +154,7 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
         if (tokenCode == null)
             throw new BadRequestException(String.format("There is no valid ongoing %s process", tokenCodeType.label));
 
-        if (!tokenCode.getCode().equals(code))
+        if (!tokenCode.getRequestId().equals(code))
             throw new ForbiddenException("Code does not match with expected value");
 
         logger.info(String.format("User %s correctly answered the %s code", user.getId(), tokenCodeType.label));
@@ -162,7 +162,7 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
         tokenValidated(user, phoneNumber, tokenCode.getId(), TokenCodeType.OTP.equals(tokenCodeType));
 
         if (TokenCodeType.OTP.equals(tokenCodeType))
-            updateUserOTPCredential(user, phoneNumber, tokenCode.getCode());
+            updateUserOTPCredential(user, phoneNumber, tokenCode.getRequestId());
     }
 
     @Override

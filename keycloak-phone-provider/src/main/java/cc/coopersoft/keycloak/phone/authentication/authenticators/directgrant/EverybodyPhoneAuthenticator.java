@@ -43,7 +43,7 @@ public class EverybodyPhoneAuthenticator extends BaseDirectGrantAuthenticator {
         .getProvider(PhoneVerificationCodeProvider.class);
     TokenCodeRepresentation tokenCode = phoneVerificationCodeProvider.ongoingProcess(phoneNumber, TokenCodeType.AUTH);
 
-    if (tokenCode == null || !tokenCode.getCode().equals(code)) {
+    if (tokenCode == null || !tokenCode.getRequestId().equals(code)) {
       invalidCredentials(context);
       return;
     }
