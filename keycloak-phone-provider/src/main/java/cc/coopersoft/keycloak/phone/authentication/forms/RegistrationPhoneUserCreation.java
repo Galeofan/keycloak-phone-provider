@@ -332,7 +332,7 @@ public class RegistrationPhoneUserCreation implements FormActionFactory, FormAct
       context.getEvent().detail(Details.AUTH_TYPE, authType);
     }
 
-    logger.info(String.format("user: %s is created, user name is %s ", user.getId(), user.getUsername()));
+    logger.info(String.format("user: %s is created, username is %s ", user.getId(), user.getUsername()));
   }
 
   @Override

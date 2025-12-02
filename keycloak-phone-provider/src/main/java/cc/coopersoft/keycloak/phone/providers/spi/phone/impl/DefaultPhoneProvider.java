@@ -42,12 +42,12 @@ public class DefaultPhoneProvider implements PhoneProvider {
             logger.error("Message sender service provider not found!");
         }
 
-        if (Validation.isBlank(config.get("service")))
-            logger.warn("No message sender service provider specified! Default provider'" +
-                    this.service
-                    + "' will be used. You can use keycloak start param '--spi-phone-default-service' to specify a different one. ");
-
-        logger.info("SMS sender provider '" + this.service + "' will be used!");
+//        if (Validation.isBlank(config.get("service")))
+//            logger.warn("No message sender service provider specified! Default provider'" +
+//                    this.service
+//                    + "' will be used. You can use keycloak start param '--spi-phone-default-service' to specify a different one. ");
+//
+//        logger.info("SMS sender provider '" + this.service + "' will be used!");
 
         this.tokenExpiresIn = config.getInt("tokenExpiresIn", 60);
         this.targetHourMaximum = config.getInt("targetHourMaximum", 3);
@@ -137,7 +137,7 @@ public class DefaultPhoneProvider implements PhoneProvider {
             TokenCodeRepresentation token = TokenCodeRepresentation.forPhoneNumber(phoneNumber, requestId);
             //Сохранение в бд
             getTokenCodeService().persistCode(token, type, tokenExpiresIn);
-            logger.info(String.format("Sent %s code to %s over %s", type.label, phoneNumber, service));
+            logger.info(String.format("Successfully sent %s code to %s over %s", type.label, phoneNumber, service));
         } catch (MessageSendException e) {
             logger.error(String.format("Message sending to %s failed with %s: %s",
                     phoneNumber, e.getErrorCode(), e.getErrorMessage()));

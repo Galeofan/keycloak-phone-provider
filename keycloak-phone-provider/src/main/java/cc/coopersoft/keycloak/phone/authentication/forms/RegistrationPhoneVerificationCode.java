@@ -152,9 +152,10 @@ public class RegistrationPhoneVerificationCode implements FormAction, FormAction
     context.getEvent().detail(FIELD_PHONE_NUMBER, phoneNumber);
 
     String verificationCode = formData.getFirst(FIELD_VERIFICATION_CODE);
+
     TokenCodeRepresentation tokenCode = getTokenCodeService(session).ongoingProcess(phoneNumber,
         TokenCodeType.REGISTRATION);
-    if (Validation.isBlank(verificationCode) || tokenCode == null || !tokenCode.getRequestId().equals(verificationCode)) {
+    if (Validation.isBlank(verificationCode) || tokenCode == null) {
       context.error(Errors.INVALID_REGISTRATION);
       formData.remove(FIELD_VERIFICATION_CODE);
       errors.add(new FormMessage(FIELD_VERIFICATION_CODE, SupportPhonePages.Errors.NOT_MATCH.message()));
@@ -162,6 +163,7 @@ public class RegistrationPhoneVerificationCode implements FormAction, FormAction
       return;
     }
 
+    getTokenCodeService(session).validateCode(null, phoneNumber, verificationCode, TokenCodeType.REGISTRATION);
     context.getSession().setAttribute("tokenId", tokenCode.getId());
     context.success();
   }

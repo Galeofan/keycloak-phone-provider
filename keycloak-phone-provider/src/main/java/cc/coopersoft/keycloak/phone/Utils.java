@@ -100,7 +100,7 @@ public class Utils {
         var resultPhoneNumber = phoneNumber.trim();
         var defaultRegion = defaultRegion(session);
 
-        logger.info(String.format("default region '%s' will be used", defaultRegion));
+//        logger.info(String.format("default region '%s' will be used", defaultRegion));
 
 
         try {

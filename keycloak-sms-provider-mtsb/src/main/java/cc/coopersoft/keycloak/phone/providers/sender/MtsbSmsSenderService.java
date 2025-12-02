@@ -37,7 +37,7 @@ public class MtsbSmsSenderService extends FullSmsSenderAbstractService {
 
     @Override
     public void sendMessage(String phoneNumber) {
-        logger.info(String.format("Sending to: %s ", phoneNumber));
+        logger.info(String.format("Sending SMS to: %s ", phoneNumber));
 
         SmsRequestDto request = SmsRequestDto.builder()
                 .sms("test")
@@ -59,7 +59,7 @@ public class MtsbSmsSenderService extends FullSmsSenderAbstractService {
             session.setAttribute("REQUEST_ID", dto.getRequestId());
 
         } catch (Exception e) {
-            logger.error("Ошибка при выполнении запроса или парсинге ответа", e);
+            logger.error("Error on executing or parsing response", e);
             throw new RuntimeException(e);
         }
     }
@@ -73,14 +73,14 @@ public class MtsbSmsSenderService extends FullSmsSenderAbstractService {
             HttpPost post = new HttpPost(uri);
             final String requestData = JsonSerialization.writeValueAsString(request);
             post.setEntity(new StringEntity(requestData, StandardCharsets.UTF_8));
-            final String logMessage = String.format("Url post запроса: %s,\nHeaders запроса: %s\nBody запроса: %s",
+            final String logMessage = String.format("POST Url: %s,\nHeaders: %s\nBody: %s",
                     uri.toString(),
                     null,
                     requestData);
             logger.info(logMessage);
             return post;
         } catch (Exception e) {
-            logger.error("Ошибка при формировании POST запроса", e);
+            logger.error("Error on creating POST request", e);
             throw new RuntimeException(e);
         }
     }

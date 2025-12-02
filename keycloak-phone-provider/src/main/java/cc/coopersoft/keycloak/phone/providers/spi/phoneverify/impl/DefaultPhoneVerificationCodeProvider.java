@@ -11,7 +11,17 @@ import cc.coopersoft.keycloak.phone.providers.exception.PhoneNumberInvalidExcept
 import cc.coopersoft.keycloak.phone.providers.jpa.TokenCode;
 import cc.coopersoft.keycloak.phone.providers.representations.TokenCodeRepresentation;
 import cc.coopersoft.keycloak.phone.providers.spi.phoneverify.PhoneVerificationCodeProvider;
+import cc.coopersoft.keycloak.phone.providers.spi.phoneverify.impl.dto.OtpRequestDto;
+import cc.coopersoft.keycloak.phone.providers.spi.phoneverify.impl.dto.OtpResponseDto;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.jboss.logging.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.keycloak.connections.httpclient.HttpClientProvider;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.credential.CredentialModel;
 import org.keycloak.credential.CredentialProvider;
@@ -27,6 +37,8 @@ import jakarta.persistence.TemporalType;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.ForbiddenException;
 import java.io.IOException;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -36,12 +48,15 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
 
     private static final Logger logger = Logger.getLogger(DefaultPhoneVerificationCodeProvider.class);
     private final KeycloakSession session;
+    private final CloseableHttpClient httpClient;
 
     DefaultPhoneVerificationCodeProvider(KeycloakSession session) {
         this.session = session;
         if (getRealm() == null) {
             throw new IllegalStateException("The service cannot accept a session without a realm in its context.");
         }
+        this.httpClient = session.getProvider(HttpClientProvider.class)
+                .getHttpClient();
     }
 
     private EntityManager getEntityManager() {
@@ -148,25 +163,87 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
     @Override
     public void validateCode(UserModel user, String phoneNumber, String code, TokenCodeType tokenCodeType) {
 
-        logger.info(String.format("valid %s , phone: %s, code: %s", tokenCodeType, phoneNumber, code));
+        logger.info(String.format("Validating %s type [phone: %s, code: %s]", tokenCodeType, phoneNumber, code));
 
         TokenCodeRepresentation tokenCode = ongoingProcess(phoneNumber, tokenCodeType);
         if (tokenCode == null)
             throw new BadRequestException(String.format("There is no valid ongoing %s process", tokenCodeType.label));
 
-        if (!tokenCode.getRequestId().equals(code))
+        if (!validateOtpExternal(tokenCode.getRequestId(), code)) {
             throw new ForbiddenException("Code does not match with expected value");
+        }
 
-        logger.info(String.format("User %s correctly answered the %s code", user.getId(), tokenCodeType.label));
+        if (user != null) {
+            logger.infof("User %s correctly answered %s code",
+                    user.getId(), tokenCodeType);
+        } else {
+            logger.infof("Anonymous user correctly answered %s code (registration flow)",
+                    tokenCodeType);
+        }
 
         tokenValidated(user, phoneNumber, tokenCode.getId(), TokenCodeType.OTP.equals(tokenCodeType));
 
-        if (TokenCodeType.OTP.equals(tokenCodeType))
+        if (TokenCodeType.OTP.equals(tokenCodeType) && user != null) {
             updateUserOTPCredential(user, phoneNumber, tokenCode.getRequestId());
+        }
+    }
+
+    public boolean validateOtpExternal(String requestId, String code) {
+        logger.info("Sending OTP request");
+
+        OtpRequestDto request = OtpRequestDto.builder()
+                .code(code)
+                .session(requestId)
+                .build();
+
+        HttpPost post = createPostRequest(request);
+
+        try {
+            HttpResponse httpResponse = httpClient.execute(post);
+
+            int status = httpResponse.getStatusLine().getStatusCode();
+            String body = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+
+            logger.infof("HTTP status: %s", status);
+            logger.infof("HTTP body: %s", body);
+
+            OtpResponseDto dto = JsonSerialization.readValue(body, OtpResponseDto.class);
+
+            return dto.getResult().equalsIgnoreCase("success");
+        } catch (Exception e) {
+            logger.error("Error on executing or parsing response", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @NotNull
+    private static HttpPost createPostRequest(OtpRequestDto request) {
+        try {
+            final URI uri = new URIBuilder("https://host.docker.internal:8983/otp")
+                    .setCharset(StandardCharsets.UTF_8)
+                    .build();
+            HttpPost post = new HttpPost(uri);
+            final String requestData = JsonSerialization.writeValueAsString(request);
+            post.setEntity(new StringEntity(requestData, StandardCharsets.UTF_8));
+            final String logMessage = String.format("Url post запроса: %s,\nHeaders запроса: %s\nBody запроса: %s",
+                    uri.toString(),
+                    null,
+                    requestData);
+            logger.info(logMessage);
+            return post;
+        } catch (Exception e) {
+            logger.error("Error on creating POST request", e);
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void tokenValidated(UserModel user, String phoneNumber, String tokenCodeId, boolean isOTP) {
+
+        if (user == null) {
+            validateProcess(tokenCodeId, null);
+            return;
+        }
 
         boolean updateUserPhoneNumber = !isOTP;
         if (isOTP) {
@@ -226,7 +303,7 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
     public void validateProcess(String tokenCodeId, UserModel user) {
         TokenCode entity = getEntityManager().find(TokenCode.class, tokenCodeId);
         entity.setConfirmed(true);
-        entity.setByWhom(user.getId());
+        entity.setByWhom(user != null ? user.getId() : null);
         getEntityManager().persist(entity);
     }
 
