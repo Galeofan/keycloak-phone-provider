@@ -2,7 +2,7 @@ package cc.coopersoft.keycloak.phone;
 
 import cc.coopersoft.common.OptionalUtils;
 import cc.coopersoft.keycloak.phone.providers.exception.PhoneNumberInvalidException;
-import cc.coopersoft.keycloak.phone.providers.spi.PhoneProvider;
+import cc.coopersoft.keycloak.phone.providers.spi.phone.PhoneProvider;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
@@ -100,7 +100,7 @@ public class Utils {
         var resultPhoneNumber = phoneNumber.trim();
         var defaultRegion = defaultRegion(session);
 
-        logger.info(String.format("default region '%s' will be used", defaultRegion));
+//        logger.info(String.format("default region '%s' will be used", defaultRegion));
 
 
         try {

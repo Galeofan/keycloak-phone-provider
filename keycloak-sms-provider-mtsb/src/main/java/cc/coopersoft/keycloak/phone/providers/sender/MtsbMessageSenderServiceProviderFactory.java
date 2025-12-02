@@ -1,7 +1,7 @@
 package cc.coopersoft.keycloak.phone.providers.sender;
 
-import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderService;
-import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderServiceProviderFactory;
+import cc.coopersoft.keycloak.phone.providers.spi.messagesender.MessageSenderService;
+import cc.coopersoft.keycloak.phone.providers.spi.messagesender.MessageSenderServiceProviderFactory;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
@@ -14,7 +14,8 @@ public class MtsbMessageSenderServiceProviderFactory implements MessageSenderSer
     }
 
     @Override
-    public void init(Config.Scope scope) {
+    public void init(Config.Scope config) {
+        //this.baseUrl = config.get("baseUrl");
     }
 
     @Override
@@ -29,4 +30,5 @@ public class MtsbMessageSenderServiceProviderFactory implements MessageSenderSer
     public String getId() {
         return "mtsb";
     }
+
 }

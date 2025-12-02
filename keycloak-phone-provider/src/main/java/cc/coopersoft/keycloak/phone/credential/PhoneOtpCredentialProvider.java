@@ -2,7 +2,7 @@ package cc.coopersoft.keycloak.phone.credential;
 
 import cc.coopersoft.keycloak.phone.authentication.authenticators.browser.SmsOtpMfaAuthenticatorFactory;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
-import cc.coopersoft.keycloak.phone.providers.spi.PhoneVerificationCodeProvider;
+import cc.coopersoft.keycloak.phone.providers.spi.phoneverify.PhoneVerificationCodeProvider;
 import org.jboss.logging.Logger;
 import org.keycloak.common.util.ObjectUtil;
 import org.keycloak.common.util.Time;

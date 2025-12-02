@@ -1,7 +1,7 @@
 package cc.coopersoft.keycloak.phone.providers.sender;
 
 import cc.coopersoft.keycloak.phone.providers.exception.MessageSendException;
-import cc.coopersoft.keycloak.phone.providers.spi.FullSmsSenderAbstractService;
+import cc.coopersoft.keycloak.phone.providers.spi.messagesender.FullSmsSenderAbstractService;
 import org.jboss.logging.Logger;
 import org.keycloak.models.KeycloakSession;
 
@@ -16,10 +16,10 @@ public class DummySmsSenderService extends FullSmsSenderAbstractService {
     }
 
     @Override
-    public void sendMessage(String phoneNumber, String message) throws MessageSendException {
+    public void sendMessage(String phoneNumber) throws MessageSendException {
 
         // here you call the method for sending messages
-        logger.info(String.format("To: %s >>> %s", phoneNumber, message));
+        logger.info(String.format("Sending sms to: %s", phoneNumber));
 
         // simulate a failure
         if (new Random().nextInt(10) % 5 == 0) {

@@ -2,7 +2,7 @@ package cc.coopersoft.keycloak.phone.authentication.authenticators.directgrant;
 
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.representations.TokenCodeRepresentation;
-import cc.coopersoft.keycloak.phone.providers.spi.PhoneVerificationCodeProvider;
+import cc.coopersoft.keycloak.phone.providers.spi.phoneverify.PhoneVerificationCodeProvider;
 import cc.coopersoft.keycloak.phone.Utils;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -43,7 +43,7 @@ public class EverybodyPhoneAuthenticator extends BaseDirectGrantAuthenticator {
         .getProvider(PhoneVerificationCodeProvider.class);
     TokenCodeRepresentation tokenCode = phoneVerificationCodeProvider.ongoingProcess(phoneNumber, TokenCodeType.AUTH);
 
-    if (tokenCode == null || !tokenCode.getCode().equals(code)) {
+    if (tokenCode == null || !tokenCode.getRequestId().equals(code)) {
       invalidCredentials(context);
       return;
     }

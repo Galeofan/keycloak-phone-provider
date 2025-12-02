@@ -60,8 +60,8 @@
 
     <modules>
         <module>keycloak-phone-provider</module>
-        <module>keycloak-phone-provider.resources</module>
-        <module>keycloak-sms-provider-dummy</module>
+        <module>keycloak-phone-provider-theme</module>
+<!--        <module>keycloak-sms-provider-dummy</module>-->
         <module>keycloak-sms-provider-mtsb</module>
     </modules>
 
@@ -97,6 +97,16 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>cc.coopersoft</groupId>
+                <artifactId>keycloak-phone-provider</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
