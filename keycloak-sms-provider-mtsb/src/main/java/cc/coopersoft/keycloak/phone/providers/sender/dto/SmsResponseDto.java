@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SmsResponseDto {
 
-    private String requestId;
+    private String session;
 
 }

@@ -12,10 +12,16 @@ import lombok.NoArgsConstructor;
 public class MessageSendException extends Exception {
 
     private Integer statusCode = -1;
-    private String errorCode = "";
+    private String errorCode = "-1";
     private String errorMessage = "";
 
     public MessageSendException(String message, Throwable cause) {
         super(message, cause);
+        this.errorMessage = message;
+    }
+
+    public MessageSendException(String message) {
+        super(message);
+        this.errorMessage = message;
     }
 }

@@ -4,7 +4,7 @@
         <#if section?has_content && section == "header">
             <div class="kc-header-with-logo">
                 <h1 class="kc-header-title">
-                    ${msg("loginAccountTitle")}
+                    ${msg("registerTitle")}
                 </h1>
             </div>
         </#if>

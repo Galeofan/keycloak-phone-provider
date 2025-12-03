@@ -1,8 +1,10 @@
 package cc.coopersoft.keycloak.phone.providers.exception;
 
 import com.google.i18n.phonenumbers.NumberParseException;
+import lombok.Getter;
 
-public class PhoneNumberInvalidException extends Exception{
+@Getter
+public class PhoneNumberInvalidException extends Exception {
 
   public enum ErrorType {
 
@@ -16,7 +18,7 @@ public class PhoneNumberInvalidException extends Exception{
 
     private final String errorMessage;
 
-    public String message(){
+    public String message() {
       return errorMessage;
     }
 
@@ -29,7 +31,7 @@ public class PhoneNumberInvalidException extends Exception{
 
   public PhoneNumberInvalidException(NumberParseException parseException) {
     super(parseException);
-    this.errorType =ErrorType.valueOf(parseException.getErrorType().name());
+    this.errorType = ErrorType.valueOf(parseException.getErrorType().name());
   }
 
   public PhoneNumberInvalidException(ErrorType errorType,String message) {
@@ -37,7 +39,4 @@ public class PhoneNumberInvalidException extends Exception{
     this.errorType = errorType;
   }
 
-  public ErrorType getErrorType() {
-    return errorType;
-  }
 }

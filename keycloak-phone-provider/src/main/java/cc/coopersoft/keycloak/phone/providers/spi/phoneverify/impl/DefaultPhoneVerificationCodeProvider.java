@@ -7,13 +7,23 @@ import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialModel;
 import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialProvider;
 import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialProviderFactory;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
+import cc.coopersoft.keycloak.phone.providers.exception.BuildRequestException;
+import cc.coopersoft.keycloak.phone.providers.exception.ExternalOtpValidationException;
 import cc.coopersoft.keycloak.phone.providers.exception.PhoneNumberInvalidException;
 import cc.coopersoft.keycloak.phone.providers.jpa.TokenCode;
 import cc.coopersoft.keycloak.phone.providers.representations.TokenCodeRepresentation;
 import cc.coopersoft.keycloak.phone.providers.spi.phoneverify.PhoneVerificationCodeProvider;
 import cc.coopersoft.keycloak.phone.providers.spi.phoneverify.impl.dto.OtpRequestDto;
 import cc.coopersoft.keycloak.phone.providers.spi.phoneverify.impl.dto.OtpResponseDto;
-import org.apache.http.HttpResponse;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TemporalType;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ForbiddenException;
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
@@ -31,18 +41,16 @@ import org.keycloak.models.UserModel;
 import org.keycloak.services.validation.Validation;
 import org.keycloak.util.JsonSerialization;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.TemporalType;
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.ForbiddenException;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static org.keycloak.utils.MediaType.APPLICATION_JSON;
 
 public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCodeProvider {
 
@@ -101,7 +109,7 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
 
     @Override
     public boolean isAbusing(String phoneNumber, TokenCodeType tokenCodeType,
-            String sourceAddr, int sourceHourMaximum, int targetHourMaximum) {
+                             String sourceAddr, int sourceHourMaximum, int targetHourMaximum) {
 
         Date oneHourAgo = new Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1));
 
@@ -163,14 +171,14 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
     @Override
     public void validateCode(UserModel user, String phoneNumber, String code, TokenCodeType tokenCodeType) {
 
-        logger.info(String.format("Validating %s type [phone: %s, code: %s]", tokenCodeType, phoneNumber, code));
+        logger.info(String.format("Validating %s code type [phone: %s, code: %s]", tokenCodeType, phoneNumber, code));
 
         TokenCodeRepresentation tokenCode = ongoingProcess(phoneNumber, tokenCodeType);
         if (tokenCode == null)
             throw new BadRequestException(String.format("There is no valid ongoing %s process", tokenCodeType.label));
 
         if (!validateOtpExternal(tokenCode.getRequestId(), code)) {
-            throw new ForbiddenException("Code does not match with expected value");
+            throw new ForbiddenException("Error validating OTP");
         }
 
         if (user != null) {
@@ -189,52 +197,86 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
     }
 
     public boolean validateOtpExternal(String requestId, String code) {
-        logger.info("Sending OTP request");
-
-        OtpRequestDto request = OtpRequestDto.builder()
-                .code(code)
-                .session(requestId)
-                .build();
-
-        HttpPost post = createPostRequest(request);
+        logger.info("Sending OTP confirm request");
 
         try {
-            HttpResponse httpResponse = httpClient.execute(post);
+            OtpRequestDto requestBody = buildRequestDto(requestId, code);
+            HttpPost postRequest = buildPostRequest(requestBody);
 
-            int status = httpResponse.getStatusLine().getStatusCode();
-            String body = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+            HttpResponseWrapper httpResponse = executeRequest(postRequest);
 
-            logger.infof("HTTP status: %s", status);
-            logger.infof("HTTP body: %s", body);
+            logResponse(httpResponse);
 
-            OtpResponseDto dto = JsonSerialization.readValue(body, OtpResponseDto.class);
+            if (httpResponse.status() != HttpStatus.SC_OK) {
+                throw new ExternalOtpValidationException("Unexpected status " + httpResponse.status());
+            }
 
-            return dto.getResult().equalsIgnoreCase("success");
+            OtpResponseDto responseDto = JsonSerialization.readValue(httpResponse.body(), OtpResponseDto.class);
+
+            return "success".equalsIgnoreCase(responseDto.getResult());
         } catch (Exception e) {
-            logger.error("Error on executing or parsing response", e);
-            throw new RuntimeException(e);
+            logger.error("Error validating OTP", e);
+            return false;
         }
     }
 
     @NotNull
-    private static HttpPost createPostRequest(OtpRequestDto request) {
+    private OtpRequestDto buildRequestDto(String requestId, String code) {
+        return OtpRequestDto.builder()
+                .session(requestId)
+                .code(code)
+                .build();
+    }
+
+    @NotNull
+    private HttpPost buildPostRequest(OtpRequestDto request) throws BuildRequestException {
         try {
             final URI uri = new URIBuilder("https://host.docker.internal:8983/otp")
                     .setCharset(StandardCharsets.UTF_8)
                     .build();
-            HttpPost post = new HttpPost(uri);
-            final String requestData = JsonSerialization.writeValueAsString(request);
-            post.setEntity(new StringEntity(requestData, StandardCharsets.UTF_8));
-            final String logMessage = String.format("Url post запроса: %s,\nHeaders запроса: %s\nBody запроса: %s",
-                    uri.toString(),
-                    null,
-                    requestData);
-            logger.info(logMessage);
-            return post;
+            HttpPost postRequest = new HttpPost(uri);
+            postRequest.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
+            final String requestBody = JsonSerialization.writeValueAsPrettyString(request);
+            postRequest.setEntity(new StringEntity(requestBody, StandardCharsets.UTF_8));
+            logger.info("""
+                    
+                    ----------[HTTP POST Request]----------
+                    Url: {}
+                    Headers: {}
+                    Body:
+                    {}""".replace("{}", "%s")
+                    .formatted(uri, Arrays.toString(postRequest.getAllHeaders()), requestBody));
+            return postRequest;
         } catch (Exception e) {
             logger.error("Error on creating POST request", e);
-            throw new RuntimeException(e);
+            throw new BuildRequestException(e.getMessage(), e.getCause());
         }
+    }
+
+    @NotNull
+    private HttpResponseWrapper executeRequest(HttpPost post) throws IOException {
+        try (CloseableHttpResponse response = httpClient.execute(post)) {
+
+            int status = response.getStatusLine().getStatusCode();
+            String body = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+
+            return new HttpResponseWrapper(status, body, response.getAllHeaders());
+        }
+    }
+
+    private void logResponse(HttpResponseWrapper response) {
+        String headers = Arrays.stream(response.headers())
+                .map(h -> h.getName() + ":" + h.getValue())
+                .collect(Collectors.joining(", "));
+
+        logger.info("""
+                
+                ----------[HTTP POST Response]----------
+                Status: {}
+                Headers: {}
+                Body:
+                {}""".replace("{}", "%s")
+                .formatted(response.status(), headers, response.body()));
     }
 
     @Override
@@ -320,5 +362,8 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
 
     @Override
     public void close() {
+    }
+
+    private record HttpResponseWrapper(int status, String body, Header[] headers) {
     }
 }

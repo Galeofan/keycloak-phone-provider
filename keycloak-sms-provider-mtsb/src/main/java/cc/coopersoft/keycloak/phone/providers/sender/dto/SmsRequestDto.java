@@ -7,6 +7,7 @@ import lombok.Data;
 @Builder
 public class SmsRequestDto {
 
+    private String phone;
     private String sms;
 
 }
