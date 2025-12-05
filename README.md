@@ -1,31 +1,11 @@
-# Keycloak (Quarkus 25.x.x)  Phone Provider - Bate
-![Build Status](https://github.com/cooperlyt/keycloak-phone-provider/actions/workflows/compile-and-liveness-check.yml/badge.svg)
-![ci](https://github.com/cooperlyt/keycloak-phone-provider/actions/workflows/ci-keycloak20.yml/badge.svg)
-![ci](https://github.com/cooperlyt/keycloak-phone-provider/actions/workflows/ci-keycloak21.yml/badge.svg)
- + Phone support like e-mail
- + One Time Password (OTP) by phone
- + Login by phone
- + Register with phone
- + Authentication by phone
- + Reset password by phone
- + WeiXin APP Grant
-
-sms
-voice
-phone one key login
+# Keycloak (Quarkus 26.2.3) Phone Provider
+ + Регистрация и логин по номеру телефона любого оператора
+ + Отправка OTP по СМС через http endpoint
 
 With this provider you can **enforce authentication policies based on a verification token sent to users' mobile phones**.
 Currently, there are implementations for:
 
-+ Aliyun
-+ AWS SNS
-+ Cloopen
-+ Tencent
-+ TotalVoice
-+ Twilio,
-+ YunTongXun SMS
-+ Bulk SMS
-+ Two Factor
++ 
 
 More services can be added with ease due to the modularity of the code.  In fact, nothing would stop you from implementing a
 sender of TTS calls or WhatsApp messages.
