@@ -64,4 +64,12 @@
             columnName="CODE"
             newDataType="VARCHAR(255)"/>
   </changeSet>
+
+    <changeSet author="galeofan" id="token-code-6.5">
+        <renameColumn
+                tableName="PHONE_MESSAGE_TOKEN_CODE"
+                oldColumnName="CODE"
+                newColumnName="OTP_ID"
+                columnDataType="VARCHAR(255)"/>
+    </changeSet>
 </databaseChangeLog>

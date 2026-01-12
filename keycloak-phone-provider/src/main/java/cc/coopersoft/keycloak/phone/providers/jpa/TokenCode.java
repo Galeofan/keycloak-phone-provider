@@ -36,8 +36,8 @@ public class TokenCode {
         @Column(name = "TYPE", nullable = false)
         private String type;
 
-        @Column(name = "CODE", nullable = false)
-        private String code;
+        @Column(name = "OTP_ID", nullable = false)
+        private String otpId;
 
         @Temporal(TemporalType.TIMESTAMP)
         @Column(name = "CREATED_AT", nullable = false)

@@ -9,8 +9,8 @@ COPY providers/keycloak-phone-provider-theme.jar /opt/keycloak/providers/
 #dummy provider
 #COPY providers/keycloak-sms-provider-dummy.jar /opt/keycloak/providers/
 
-#mtsb provider
-COPY providers/keycloak-sms-provider-mtsb.jar /opt/keycloak/providers/
+#mrc provider
+COPY providers/keycloak-sms-provider-mrc.jar /opt/keycloak/providers/
 
 RUN mkdir /opt/keycloak/certs
 

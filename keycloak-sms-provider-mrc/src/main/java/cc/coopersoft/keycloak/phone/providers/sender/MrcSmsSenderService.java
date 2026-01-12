@@ -28,20 +28,24 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.keycloak.utils.MediaType.APPLICATION_JSON;
 
-public class MtsbSmsSenderService extends FullSmsSenderAbstractService {
+public class MrcSmsSenderService extends FullSmsSenderAbstractService {
 
-    private static final Logger logger = Logger.getLogger(MtsbSmsSenderService.class);
+    private static final Logger logger = Logger.getLogger(MrcSmsSenderService.class);
+    private static final String GRAVITEE_KEY_HDR_NAME = "x-gravitee-api-key";
+    private static final String GRAVITEE_KEY_HDR_VALUE = "testgraviteekey";
+    private static final String REQUEST_ID_HDR_NAME = "x-request-id";
     private final CloseableHttpClient httpClient;
 
     private PhoneVerificationCodeProvider getTokenCodeService() {
         return session.getProvider(PhoneVerificationCodeProvider.class);
     }
 
-    public MtsbSmsSenderService(KeycloakSession session) {
+    public MrcSmsSenderService(KeycloakSession session) {
         super(session);
         this.httpClient = session.getProvider(HttpClientProvider.class)
                 .getHttpClient();
@@ -52,7 +56,7 @@ public class MtsbSmsSenderService extends FullSmsSenderAbstractService {
         logger.info(String.format("Sending SMS to: %s ", phoneNumber));
 
         try {
-            SmsRequestDto requestBody = buildRequestDto(phoneNumber);
+            SmsRequestDto requestBody = buildSmsRequestDto(phoneNumber);
             HttpPost postRequest = buildPostRequest(requestBody);
 
             HttpResponseWrapper httpResponse = executeRequest(postRequest);
@@ -65,11 +69,11 @@ public class MtsbSmsSenderService extends FullSmsSenderAbstractService {
 
             SmsResponseDto responseDto = JsonSerialization.readValue(httpResponse.body(), SmsResponseDto.class);
 
-            if (StringUtil.isBlank(responseDto.getSession())) {
+            if (StringUtil.isBlank(responseDto.getOtpId())) {
                 throw new MessageSendException("Error response structure");
             }
 
-            session.setAttribute("REQUEST_ID", responseDto.getSession());
+            session.setAttribute("OTP_ID", responseDto.getOtpId());
         } catch (RequestExecutionException e) {
             throw new MessageSendException("Error execution request", e.getCause());
         } catch (ExternalOtpValidationException e) {
@@ -82,10 +86,9 @@ public class MtsbSmsSenderService extends FullSmsSenderAbstractService {
     }
 
     @NotNull
-    private SmsRequestDto buildRequestDto(String phoneNumber) {
+    private SmsRequestDto buildSmsRequestDto(String phoneNumber) {
         return SmsRequestDto.builder()
-                .phone(phoneNumber)
-                .sms("test")
+                .phoneNumber(phoneNumber)
                 .build();
     }
 
@@ -97,6 +100,8 @@ public class MtsbSmsSenderService extends FullSmsSenderAbstractService {
                     .build();
             HttpPost postRequest = new HttpPost(uri);
             postRequest.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
+            postRequest.setHeader(GRAVITEE_KEY_HDR_NAME, GRAVITEE_KEY_HDR_VALUE);
+            postRequest.setHeader(REQUEST_ID_HDR_NAME, UUID.randomUUID().toString());
             final String requestBody = JsonSerialization.writeValueAsPrettyString(request);
             postRequest.setEntity(new StringEntity(requestBody, StandardCharsets.UTF_8));
             logger.info("""
@@ -117,10 +122,8 @@ public class MtsbSmsSenderService extends FullSmsSenderAbstractService {
     @NotNull
     private HttpResponseWrapper executeRequest(HttpPost post) throws RequestExecutionException, ExternalOtpValidationException {
         try (CloseableHttpResponse response = httpClient.execute(post)) {
-
             int status = response.getStatusLine().getStatusCode();
             String body = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-
             return new HttpResponseWrapper(status, body, response.getAllHeaders());
         } catch (IOException e) {
             throw new RequestExecutionException("Error to execute request", e.getCause());

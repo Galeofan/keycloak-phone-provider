@@ -6,11 +6,11 @@ import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
-public class MtsbMessageSenderServiceProviderFactory implements MessageSenderServiceProviderFactory {
+public class MrcMessageSenderServiceProviderFactory implements MessageSenderServiceProviderFactory {
 
     @Override
     public MessageSenderService create(KeycloakSession keycloakSession) {
-        return new MtsbSmsSenderService(keycloakSession);
+        return new MrcSmsSenderService(keycloakSession);
     }
 
     @Override
@@ -28,7 +28,7 @@ public class MtsbMessageSenderServiceProviderFactory implements MessageSenderSer
 
     @Override
     public String getId() {
-        return "mtsb";
+        return "mrc";
     }
 
 }

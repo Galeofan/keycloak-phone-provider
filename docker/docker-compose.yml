@@ -36,7 +36,7 @@ services:
 
     command:
       - start-dev
-      - --spi-phone-default-service=mtsb
+      - --spi-phone-default-service=mrc
       - --spi-phone-default-phone_auth-phone-default-region=RU
       - --spi-phone-default-source-hour-maximum=0
       - --spi-phone-default-target-hour-maximum=0

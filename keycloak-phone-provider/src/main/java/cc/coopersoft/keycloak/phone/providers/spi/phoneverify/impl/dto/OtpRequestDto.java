@@ -6,8 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class OtpRequestDto {
-
-    private String code;
-    private String session;
-
+    private String otpId;
+    private String otpCode;
 }

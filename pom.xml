@@ -62,7 +62,7 @@
         <module>keycloak-phone-provider</module>
         <module>keycloak-phone-provider-theme</module>
 <!--        <module>keycloak-sms-provider-dummy</module>-->
-        <module>keycloak-sms-provider-mtsb</module>
+        <module>keycloak-sms-provider-mrc</module>
     </modules>
 
     <dependencies>

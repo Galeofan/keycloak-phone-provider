@@ -47,6 +47,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -57,6 +58,10 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
     private static final Logger logger = Logger.getLogger(DefaultPhoneVerificationCodeProvider.class);
     private final KeycloakSession session;
     private final CloseableHttpClient httpClient;
+    private static final String GRAVITEE_KEY_HDR_NAME = "x-gravitee-api-key";
+    private static final String GRAVITEE_KEY_HDR_VALUE = "testgraviteekey";
+    private static final String REQUEST_ID_HDR_NAME = "x-request-id";
+    public static final int SUCCESS_CODE = 0;
 
     DefaultPhoneVerificationCodeProvider(KeycloakSession session) {
         this.session = session;
@@ -92,7 +97,7 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
 
             tokenCodeRepresentation.setId(entity.getId());
             tokenCodeRepresentation.setPhoneNumber(entity.getPhoneNumber());
-            tokenCodeRepresentation.setRequestId(entity.getCode());
+            tokenCodeRepresentation.setOtpId(entity.getOtpId());
             tokenCodeRepresentation.setType(entity.getType());
             tokenCodeRepresentation.setCreatedAt(entity.getCreatedAt());
             tokenCodeRepresentation.setExpiresAt(entity.getExpiresAt());
@@ -149,7 +154,7 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
         entity.setId(tokenCode.getId());
         entity.setRealmId(getRealm().getId());
         entity.setPhoneNumber(tokenCode.getPhoneNumber());
-        entity.setCode(tokenCode.getRequestId());
+        entity.setOtpId(tokenCode.getOtpId());
         entity.setType(tokenCodeType.name());
         entity.setCreatedAt(Date.from(now));
         entity.setExpiresAt(Date.from(now.plusSeconds(tokenExpiresIn)));
@@ -177,7 +182,7 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
         if (tokenCode == null)
             throw new BadRequestException(String.format("There is no valid ongoing %s process", tokenCodeType.label));
 
-        if (!validateOtpExternal(tokenCode.getRequestId(), code)) {
+        if (!validateOtpExternal(tokenCode.getOtpId(), code)) {
             throw new ForbiddenException("Error validating OTP");
         }
 
@@ -192,15 +197,15 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
         tokenValidated(user, phoneNumber, tokenCode.getId(), TokenCodeType.OTP.equals(tokenCodeType));
 
         if (TokenCodeType.OTP.equals(tokenCodeType) && user != null) {
-            updateUserOTPCredential(user, phoneNumber, tokenCode.getRequestId());
+            updateUserOTPCredential(user, phoneNumber, tokenCode.getOtpId());
         }
     }
 
-    public boolean validateOtpExternal(String requestId, String code) {
+    public boolean validateOtpExternal(String otpId, String code) {
         logger.info("Sending OTP confirm request");
 
         try {
-            OtpRequestDto requestBody = buildRequestDto(requestId, code);
+            OtpRequestDto requestBody = buildRequestDto(otpId, code);
             HttpPost postRequest = buildPostRequest(requestBody);
 
             HttpResponseWrapper httpResponse = executeRequest(postRequest);
@@ -213,7 +218,7 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
 
             OtpResponseDto responseDto = JsonSerialization.readValue(httpResponse.body(), OtpResponseDto.class);
 
-            return "success".equalsIgnoreCase(responseDto.getResult());
+            return responseDto.getErrorCode() == SUCCESS_CODE;
         } catch (Exception e) {
             logger.error("Error validating OTP", e);
             return false;
@@ -223,8 +228,8 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
     @NotNull
     private OtpRequestDto buildRequestDto(String requestId, String code) {
         return OtpRequestDto.builder()
-                .session(requestId)
-                .code(code)
+                .otpCode(requestId)
+                .otpId(code)
                 .build();
     }
 
@@ -236,6 +241,8 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
                     .build();
             HttpPost postRequest = new HttpPost(uri);
             postRequest.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
+            postRequest.setHeader(GRAVITEE_KEY_HDR_NAME, GRAVITEE_KEY_HDR_VALUE);
+            postRequest.setHeader(REQUEST_ID_HDR_NAME, UUID.randomUUID().toString());
             final String requestBody = JsonSerialization.writeValueAsPrettyString(request);
             postRequest.setEntity(new StringEntity(requestBody, StandardCharsets.UTF_8));
             logger.info("""
