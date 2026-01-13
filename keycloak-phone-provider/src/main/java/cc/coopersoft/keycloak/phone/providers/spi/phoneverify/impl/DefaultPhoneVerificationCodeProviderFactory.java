@@ -8,13 +8,16 @@ import org.keycloak.models.KeycloakSessionFactory;
 
 public class DefaultPhoneVerificationCodeProviderFactory implements PhoneVerificationCodeProviderFactory {
 
+    private Config.Scope config;
+
     @Override
     public PhoneVerificationCodeProvider create(KeycloakSession session) {
-        return new DefaultPhoneVerificationCodeProvider(session);
+        return new DefaultPhoneVerificationCodeProvider(session, config);
     }
 
     @Override
     public void init(Config.Scope scope) {
+        this.config = scope;
     }
 
     @Override

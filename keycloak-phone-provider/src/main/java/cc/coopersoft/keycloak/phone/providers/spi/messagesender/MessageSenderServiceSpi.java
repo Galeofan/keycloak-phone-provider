@@ -13,7 +13,7 @@ public class MessageSenderServiceSpi implements Spi {
 
     @Override
     public String getName() {
-        return "messageSenderService";
+        return "message-sender-service";
     }
 
     @Override

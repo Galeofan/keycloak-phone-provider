@@ -13,7 +13,7 @@ public class PhoneVerificationCodeSpi implements Spi {
 
     @Override
     public String getName() {
-        return "phoneVerificationCode";
+        return "phone-verification-code";
     }
 
     @Override

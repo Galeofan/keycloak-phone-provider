@@ -8,14 +8,16 @@ import org.keycloak.models.KeycloakSessionFactory;
 
 public class MrcMessageSenderServiceProviderFactory implements MessageSenderServiceProviderFactory {
 
+    private Config.Scope config;
+
     @Override
     public MessageSenderService create(KeycloakSession keycloakSession) {
-        return new MrcSmsSenderService(keycloakSession);
+        return new MrcSmsSenderService(keycloakSession, config);
     }
 
     @Override
     public void init(Config.Scope config) {
-        //this.baseUrl = config.get("baseUrl");
+        this.config = config;
     }
 
     @Override

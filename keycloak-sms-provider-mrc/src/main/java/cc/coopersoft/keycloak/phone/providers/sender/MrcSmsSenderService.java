@@ -1,5 +1,6 @@
 package cc.coopersoft.keycloak.phone.providers.sender;
 
+import cc.coopersoft.keycloak.phone.providers.config.GraviteeIntegrationConfig;
 import cc.coopersoft.keycloak.phone.providers.exception.BuildRequestException;
 import cc.coopersoft.keycloak.phone.providers.exception.ExternalOtpValidationException;
 import cc.coopersoft.keycloak.phone.providers.exception.MessageSendException;
@@ -19,6 +20,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.jboss.logging.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.keycloak.Config;
 import org.keycloak.connections.httpclient.HttpClientProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.util.JsonSerialization;
@@ -35,18 +37,16 @@ import static org.keycloak.utils.MediaType.APPLICATION_JSON;
 
 public class MrcSmsSenderService extends FullSmsSenderAbstractService {
 
+    private final Config.Scope config;
+
     private static final Logger logger = Logger.getLogger(MrcSmsSenderService.class);
     private static final String GRAVITEE_KEY_HDR_NAME = "x-gravitee-api-key";
-    private static final String GRAVITEE_KEY_HDR_VALUE = "testgraviteekey";
     private static final String REQUEST_ID_HDR_NAME = "x-request-id";
     private final CloseableHttpClient httpClient;
 
-    private PhoneVerificationCodeProvider getTokenCodeService() {
-        return session.getProvider(PhoneVerificationCodeProvider.class);
-    }
-
-    public MrcSmsSenderService(KeycloakSession session) {
+    public MrcSmsSenderService(KeycloakSession session, Config.Scope config) {
         super(session);
+        this.config = config;
         this.httpClient = session.getProvider(HttpClientProvider.class)
                 .getHttpClient();
     }
@@ -93,14 +93,15 @@ public class MrcSmsSenderService extends FullSmsSenderAbstractService {
     }
 
     @NotNull
-    private static HttpPost buildPostRequest(SmsRequestDto request) throws BuildRequestException {
+    private HttpPost buildPostRequest(SmsRequestDto request) throws BuildRequestException {
         try {
-            final URI uri = new URIBuilder("https://host.docker.internal:8983/sms")
+            GraviteeIntegrationConfig.SmsConfig cfg = GraviteeIntegrationConfig.smsFrom(config, session);
+            final URI uri = new URIBuilder(cfg.smsSendUrl())
                     .setCharset(StandardCharsets.UTF_8)
                     .build();
             HttpPost postRequest = new HttpPost(uri);
             postRequest.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
-            postRequest.setHeader(GRAVITEE_KEY_HDR_NAME, GRAVITEE_KEY_HDR_VALUE);
+            postRequest.setHeader(GRAVITEE_KEY_HDR_NAME, cfg.apiKey());
             postRequest.setHeader(REQUEST_ID_HDR_NAME, UUID.randomUUID().toString());
             final String requestBody = JsonSerialization.writeValueAsPrettyString(request);
             postRequest.setEntity(new StringEntity(requestBody, StandardCharsets.UTF_8));

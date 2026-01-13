@@ -6,6 +6,7 @@ import cc.coopersoft.keycloak.phone.authentication.requiredactions.UpdatePhoneNu
 import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialModel;
 import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialProvider;
 import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialProviderFactory;
+import cc.coopersoft.keycloak.phone.providers.config.GraviteeIntegrationConfig;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.exception.BuildRequestException;
 import cc.coopersoft.keycloak.phone.providers.exception.ExternalOtpValidationException;
@@ -31,6 +32,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.jboss.logging.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.keycloak.Config;
 import org.keycloak.connections.httpclient.HttpClientProvider;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.credential.CredentialModel;
@@ -55,16 +57,18 @@ import static org.keycloak.utils.MediaType.APPLICATION_JSON;
 
 public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCodeProvider {
 
+    private final Config.Scope config;
+
     private static final Logger logger = Logger.getLogger(DefaultPhoneVerificationCodeProvider.class);
     private final KeycloakSession session;
     private final CloseableHttpClient httpClient;
     private static final String GRAVITEE_KEY_HDR_NAME = "x-gravitee-api-key";
-    private static final String GRAVITEE_KEY_HDR_VALUE = "testgraviteekey";
     private static final String REQUEST_ID_HDR_NAME = "x-request-id";
     public static final int SUCCESS_CODE = 0;
 
-    DefaultPhoneVerificationCodeProvider(KeycloakSession session) {
+    DefaultPhoneVerificationCodeProvider(KeycloakSession session, Config.Scope config) {
         this.session = session;
+        this.config = config;
         if (getRealm() == null) {
             throw new IllegalStateException("The service cannot accept a session without a realm in its context.");
         }
@@ -236,12 +240,13 @@ public class DefaultPhoneVerificationCodeProvider implements PhoneVerificationCo
     @NotNull
     private HttpPost buildPostRequest(OtpRequestDto request) throws BuildRequestException {
         try {
-            final URI uri = new URIBuilder("https://host.docker.internal:8983/otp")
+            GraviteeIntegrationConfig.OtpConfig cfg = GraviteeIntegrationConfig.otpFrom(config, session);
+            final URI uri = new URIBuilder(cfg.otpVerifyUrl())
                     .setCharset(StandardCharsets.UTF_8)
                     .build();
             HttpPost postRequest = new HttpPost(uri);
             postRequest.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
-            postRequest.setHeader(GRAVITEE_KEY_HDR_NAME, GRAVITEE_KEY_HDR_VALUE);
+            postRequest.setHeader(GRAVITEE_KEY_HDR_NAME, cfg.apiKey());
             postRequest.setHeader(REQUEST_ID_HDR_NAME, UUID.randomUUID().toString());
             final String requestBody = JsonSerialization.writeValueAsPrettyString(request);
             postRequest.setEntity(new StringEntity(requestBody, StandardCharsets.UTF_8));

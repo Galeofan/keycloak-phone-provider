@@ -13,7 +13,7 @@ services:
       - "C:\\Users\\20And\\kc-data:/var/lib/postgresql/data"
 
   keycloak:
-    container_name: keycloak-debug
+    container_name: kc-26
     image: galeofan/keycloak:${version.keycloak}_phone-${project.version}
 
     environment:
@@ -26,6 +26,8 @@ services:
       KC_DB_URL_DATABASE: keycloak_db
       KC_DB_USERNAME: admin
       KC_DB_PASSWORD: admin
+      # Задать переменную окружения на хосте
+      GRAVITEE_API_KEY: "${GRAVITEE_API_KEY}"
 
     ports:
       - "8080:8080"
@@ -36,6 +38,8 @@ services:
 
     command:
       - start-dev
+      - --spi-message-sender-service-mrc-sms-send-url=https://host.docker.internal:8983/sms
+      - --spi-phone-verification-code-default-otp-verify-url=https://host.docker.internal:8983/otp
       - --spi-phone-default-service=mrc
       - --spi-phone-default-phone_auth-phone-default-region=RU
       - --spi-phone-default-source-hour-maximum=0
