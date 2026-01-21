@@ -7,6 +7,5 @@
 set -e
 
 mvn clean package \
-  && ./target/build-template.sh \
   && docker-compose -p keycloak -f ./target/docker-compose.yml down \
   && docker-compose -p keycloak -f ./target/docker-compose.yml up -d

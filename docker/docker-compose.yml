@@ -14,7 +14,13 @@ services:
 
   keycloak:
     container_name: kc-26
-    image: galeofan/keycloak:${version.keycloak}_phone-${project.version}
+    platform: linux/amd64
+    # Чтобы compose НЕ делал pull, а строил локально
+    build:
+      context: .
+    image: galeofan/keycloak:26.2.3_phone-2.5.0
+    # Чтобы точно не пытался тянуть из registry
+    pull_policy: never
 
     environment:
       JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
@@ -27,11 +33,11 @@ services:
       KC_DB_USERNAME: admin
       KC_DB_PASSWORD: admin
       # Задать переменную окружения на хосте
-      GRAVITEE_API_KEY: "${GRAVITEE_API_KEY}"
+      GRAVITEE_API_KEY: ${GRAVITEE_API_KEY:-}
 
     ports:
       - "8080:8080"
-      - "5005:5005" #debug
+      - "5005:5005"
 
     depends_on:
       - postgres
