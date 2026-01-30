@@ -8,7 +8,6 @@ import cc.coopersoft.keycloak.phone.providers.exception.RequestExecutionExceptio
 import cc.coopersoft.keycloak.phone.providers.sender.dto.SmsRequestDto;
 import cc.coopersoft.keycloak.phone.providers.sender.dto.SmsResponseDto;
 import cc.coopersoft.keycloak.phone.providers.spi.messagesender.FullSmsSenderAbstractService;
-import cc.coopersoft.keycloak.phone.providers.spi.phoneverify.PhoneVerificationCodeProvider;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
